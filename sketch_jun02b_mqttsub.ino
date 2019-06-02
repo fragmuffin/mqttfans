@@ -70,15 +70,18 @@ void callback(char* topic, byte* payload, unsigned int length) {
   }
   Serial.println();
 
-  // Switch on the LED if an 1 was received as first character
-  if ((char)payload[0] == '1') {
-    digitalWrite(BUILTIN_LED, LOW);   // Turn the LED on (Note that LOW is the voltage level
-    // but actually the LED is on; this is because
-    // it is active low on the ESP-01)
-  } else {
-    digitalWrite(BUILTIN_LED, HIGH);  // Turn the LED off by making the voltage HIGH
-  }
+  if (!strcmp(topic, "debug/ping")) {
+    char* data_cstr = (char *)(malloc(length + 1));
+    data_cstr[length] = 0u;
+    String payloadString = String(data_cstr);
 
+    // USE payloadString
+    if (!strcmp(payloadString.c_str(), "ping")) {
+      client.publish("debug/ping", "pong");
+    }
+
+    free(data_cstr);
+  }
 }
 
 void reconnect() {
@@ -130,4 +133,3 @@ void loop() {
     client.publish("outTopic", msg);
   }
 }
-
